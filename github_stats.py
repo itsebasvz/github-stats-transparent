@@ -445,18 +445,8 @@ Languages:
             return self._total_contributions
 
         self._total_contributions = 0
-        years = (await self.queries.query(Queries.contrib_years())) \
-            .get("data", {}) \
-            .get("viewer", {}) \
-            .get("contributionsCollection", {}) \
-            .get("contributionYears", [])
-        by_year = (await self.queries.query(Queries.all_contribs(years))) \
-            .get("data", {}) \
-            .get("viewer", {}).values()
-        for year in by_year:
-            self._total_contributions += year \
-                .get("contributionCalendar", {}) \
-                .get("totalContributions", 0)
+        r = await self.queries.query_rest(f"search/commits", {"q": f"author:{self.username}"})
+        self._total_contributions = r.get("total_count", 0)
         return self._total_contributions
 
     @property
